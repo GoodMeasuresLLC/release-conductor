@@ -29,11 +29,15 @@ module ReleaseConductor
   end
 
   def self.get(config,url)
-    response = unfuddle_request(config, url, :get)
+    response = unfuddle_request(config, url + ".json", :get) do |request|
+      request.content_type='application/json'
+    end
+
      unless response.is_a?(Net::HTTPSuccess)
-      raise "failure for #{uri}, got #{response.code} #{response.message}"
+      raise "failure for #{url}, got #{response.code} #{response.message}"
      end
-     response.body
+
+     JSON.parse(response.body)
   end
 
   def self.put(config, url, body)
@@ -49,7 +53,7 @@ module ReleaseConductor
   end
 
   def self.run_ticket_report(config, report_id)
-    hash=JSON.parse(get(config, "/api/v1/projects/#{config.fetch(:project_id)}/ticket_reports/#{report_id}/generate.json"))
+    hash=get(config, "/api/v1/projects/#{config.fetch(:project_id)}/ticket_reports/#{report_id}/generate")
     (hash["groups"].first||{})["tickets"]
   end
 
@@ -79,10 +83,9 @@ module ReleaseConductor
       # puts "Fetching Ticket Details from #{url}"
       ticket_details = get(config, url)
 
-      puts "Setting phase on ticket #{ticket['number']}"
       xml = %Q{
         <ticket>
-          <description>#{ticket['description']} - 1</description>
+          <description>#{ticket_details['description']} - 1</description>
           <summary>testing</summary>
         </ticket>
       }
