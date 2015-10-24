@@ -6,14 +6,30 @@ load File.expand_path("../release-conductor/tasks/release-conductor.rake", __FIL
 
 module ReleaseConductor
 
+  def self.unfuddle_request(config,url,type)
+    uri = URI("https://#{config.fetch(:account)}.unfuddle.com#{url}")
+
+    request = case
+    when type == :get
+      Net::HTTP::Get
+    when type == :put
+      Net::HTTP::Put
+    else
+      raise "Add support for #{type}"
+    end.new(uri)
+
+    request.content_type='application/xml'
+    request.basic_auth config.fetch(:unfuddle_user),config.fetch(:unfuddle_password)
+
+    yield(request) if block_given?
+
+    Net::HTTP.start(uri.hostname, uri.port, :use_ssl => true, :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      http.request(request)
+    end
+  end
+
   def self.get(config,url)
-     request = Net::HTTP::Get.new(url)
-     request.basic_auth config.fetch(:unfuddle_user),config.fetch(:unfuddle_password)
-     uri = URI(URI.encode("https://#{config.fetch(:account)}.unfuddle.com#{url}"))
-     http = Net::HTTP.new(uri.hostname, uri.port)
-     http.use_ssl=true
-     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-     response = http.request(request)
+    response = unfuddle_request(config, url, :get)
      unless response.is_a?(Net::HTTPSuccess)
       raise "failure for #{uri}, got #{response.code} #{response.message}"
      end
@@ -21,18 +37,15 @@ module ReleaseConductor
   end
 
   def self.put(config, url, body)
-    request = Net::HTTP::Put.new(url)
-    request.content_type='application/xml'
-    request.basic_auth config.fetch(:unfuddle_user),config.fetch(:unfuddle_password)
-    uri = URI(URI.encode("https://#{config.fetch(:account)}.unfuddle.com#{url}"))
-    http = Net::HTTP.new(uri.hostname, uri.port)
-    http.use_ssl=true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    response = http.request(request,body)
+    response = unfuddle_request(config, url, :put) do |request|
+      request.body = body
+    end
+
     unless response.is_a?(Net::HTTPSuccess)
-      puts "request.body=#{request.body}"
+      puts "response.body=#{response.body}"
       raise "failure for #{uri}, got #{response.code} #{response.message}"
     end
+    response.body
   end
 
   def self.run_ticket_report(config, report_id)
@@ -61,15 +74,19 @@ module ReleaseConductor
 
   def self.set_phase(config, tickets, phase_value_id)
     tickets.each do |ticket|
-      # field-value-id is "2", as "Phase" is the 2nd custom field for the CODE project.
+      url = "/api/v1/projects/#{config.fetch(:project_id)}/tickets/#{ticket['id']}"
+
+      # puts "Fetching Ticket Details from #{url}"
+      ticket_details = get(config, url)
+
+      puts "Setting phase on ticket #{ticket['number']}"
       xml = %Q{
         <ticket>
-          <field2-value-id>#{phase_value_id}</field2-value-id>
+          <description>#{ticket['description']} - 1</description>
           <summary>testing</summary>
         </ticket>
       }
-      puts %Q{put(config,"api/v1/tickets/#{ticket["id"]}",xml)}
-      put(config,"/api/v1/tickets/#{ticket["id"]}.xml",xml)
+      put(config,url,xml)
     end
   end
 

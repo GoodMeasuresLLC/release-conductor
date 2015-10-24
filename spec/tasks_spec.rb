@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'byebug'
 
 describe ReleaseConductor do
   before(:each) do
