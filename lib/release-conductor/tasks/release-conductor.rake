@@ -1,7 +1,6 @@
 namespace :release_conductor do
   namespace :deploy do
     task :finished do
-      puts "fetch(:stage)=#{fetch(:stage)}"
       case fetch(:stage)
       when 'beta-staging' then ReleaseConductor.punch_tickets(:staging,self,['beta'])
       when 'staging' then ReleaseConductor.punch_tickets(:staging,self,[nil,'code'])

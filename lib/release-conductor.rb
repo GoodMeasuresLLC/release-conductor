@@ -85,7 +85,7 @@ module ReleaseConductor
 
       xml = %Q{
         <ticket>
-          <description>#{ticket_details['description']} - 1</description>
+          <field2-value-id>#{phase_value_id}</field2-value-id>
           <summary>testing</summary>
         </ticket>
       }
