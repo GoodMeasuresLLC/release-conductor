@@ -1,13 +1,14 @@
 namespace :release_conductor do
   namespace :deploy do
     task :finished do
-      case fetch(:stage)
+      case fetch(:stage).to_s
       when 'beta-staging' then ReleaseConductor.punch_tickets(:staging,self,['beta'],'beta-dev')
       when 'staging' then ReleaseConductor.punch_tickets(:staging,self,[nil,'code'],'code-dev')
       when 'production' then ReleaseConductor.punch_tickets(:production, self,[nil,'code'],'code')
       when 'beta-production' then ReleaseConductor.punch_tickets(:production, self,['beta'],'beta')
       else
-        ReleaseConductor.testing(self)
+        puts "Unknown stage #{fetch(:stage)}, not punching any tickets"
+        # ReleaseConductor.testing(self)
       end
     end
     task :testing do
