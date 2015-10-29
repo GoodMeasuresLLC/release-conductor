@@ -109,7 +109,7 @@ module ReleaseConductor
       phase_id = config.fetch(env == :staging ? :test_phase : :production_phase)
       set_phase(config, tickets, phase_id)
     else
-      puts "ignoring as you are in branch #{current_branch} NOT #{branch}"
+      puts "release conductor not punching tickets as you are in branch #{current_branch} NOT #{branch}"
     end
   end
 
