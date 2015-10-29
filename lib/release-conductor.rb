@@ -76,9 +76,9 @@ module ReleaseConductor
     end
   end
 
-  def self.set_phase(config, tickets, phase_value_id)
+  def self.punch_tickets(config, tickets, phase_value_id)
     tickets.each do |ticket|
-      puts "punching ticket ##{ticket['number']}"
+      puts "release conductor: punching ticket ##{ticket['number']}"
       url = "/api/v1/projects/#{config.fetch(:project_id)}/tickets/#{ticket['id']}"
 
       # puts "Fetching Ticket Details from #{url}"
@@ -107,9 +107,9 @@ module ReleaseConductor
     if current_branch == branch
       tickets = filter_by_versions(run_ticket_report(config,report(config,env)),versions)
       phase_id = config.fetch(env == :staging ? :test_phase : :production_phase)
-      set_phase(config, tickets, phase_id)
+      punch_tickets(config, tickets, phase_id)
     else
-      puts "release conductor not punching tickets as you are in branch #{current_branch} NOT #{branch}"
+      puts "release conductor: not punching tickets as you are in branch #{current_branch} NOT #{branch}"
     end
   end
 
