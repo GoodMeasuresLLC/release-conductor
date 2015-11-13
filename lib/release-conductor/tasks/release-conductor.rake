@@ -5,13 +5,10 @@ namespace :release_conductor do
         puts "You must set environment variables UNFUDDLE_USER and UNFUDDLE_PASSWORD to use the release conductor"
       else
         case fetch(:stage).to_s
-        when 'beta-staging' then ReleaseConductor.punch_tickets(:staging,self,['beta'],'beta-dev')
-        when 'staging' then ReleaseConductor.punch_tickets(:staging,self,[nil,'code'],'code-dev')
-        when 'production' then ReleaseConductor.punch_tickets(:production, self,[nil,'code'],'code')
-        when 'beta-production' then ReleaseConductor.punch_tickets(:production, self,['beta'],'beta')
-        else
-          puts "Unknown stage #{fetch(:stage)}, not punching any tickets"
-          # ReleaseConductor.testing(self)
+          when 'beta-staging' then ReleaseConductor.punch_tickets(:staging,self,['beta'],'beta-dev')
+          when 'staging' then ReleaseConductor.punch_tickets(:staging,self,[nil,'code'],'code-dev')
+          when 'production' then ReleaseConductor.punch_tickets(:production, self,[nil,'code'],'code')
+          when 'beta' then ReleaseConductor.punch_tickets(:production, self,['beta'],'beta')
         end
       end
     end
