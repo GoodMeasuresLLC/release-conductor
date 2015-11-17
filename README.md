@@ -61,7 +61,7 @@ Deploy your application like normal and the tickets should be marked.
 4. git tag 0.0.5
 5. git push --tags
 6. gem build release-conductor.gemspec
-7. gem push push release-conductor-0.0.5.gem
+7. gem push release-conductor-0.0.5.gem
 
 ## To upgrade CODE to use the new version of the gem
 
