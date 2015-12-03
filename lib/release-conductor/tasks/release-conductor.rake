@@ -1,5 +1,7 @@
 namespace :release_conductor do
   namespace :deploy do
+
+    desc "Run the release conductor and punch tickets that are ready for testing"
     task :finished do
       if fetch(:unfuddle_user).nil? || fetch(:unfuddle_password).nil?
         puts "You must set environment variables UNFUDDLE_USER and UNFUDDLE_PASSWORD to use the release conductor"

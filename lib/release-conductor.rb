@@ -77,19 +77,23 @@ module ReleaseConductor
   end
 
   def self.set_unfuddle_phase(config, tickets, phase_value_id)
-    tickets.each do |ticket|
-      puts "release conductor: punching ticket ##{ticket['number']}"
-      url = "/api/v1/projects/#{config.fetch(:project_id)}/tickets/#{ticket['id']}"
+    if tickets.empty?
+      puts "release conductor: No tickets to punch."
+    else
+      tickets.each do |ticket|
+        puts "release conductor: punching ticket ##{ticket['number']}"
+        url = "/api/v1/projects/#{config.fetch(:project_id)}/tickets/#{ticket['id']}"
 
-      # puts "Fetching Ticket Details from #{url}"
-      ticket_details = get(config, url)
+        # puts "Fetching Ticket Details from #{url}"
+        ticket_details = get(config, url)
 
-      xml = %Q{
-        <ticket>
-          <field2-value-id>#{phase_value_id}</field2-value-id>
-        </ticket>
-      }
-      put(config,url,xml)
+        xml = %Q{
+          <ticket>
+            <field2-value-id>#{phase_value_id}</field2-value-id>
+          </ticket>
+        }
+        put(config,url,xml)
+      end
     end
   end
 
